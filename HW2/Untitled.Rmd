@@ -1,0 +1,183 @@
+## Kyungjin Cho
+## Question 1
+### Building a Logistic Regression Model
+
+```{r}
+#Data import
+dat <- read.table("/Users/irenecho/Desktop/stat443/datafiles/rhcdata.txt", header=T, sep= " ")
+dat <- dat[-1]
+
+```
+
+```{r}
+# replace categorical variables into binary values 
+dat$meanbp1 <- replace(dat$meanbp1, dat$meanbp1 <68.5, 1)
+dat$meanbp1 <- replace(dat$meanbp1, dat$meanbp1 >= 68.5, 0)
+dat$cat1 <- replace(dat$cat1, dat$cat1 == c("CHF"), 1)
+dat$cat1 <- replace(dat$cat1, dat$cat1 == c("MOSF w/Sepsis"), 1)
+dat$cat1 <- replace(dat$cat1, dat$cat1 == "COPD", 0)
+dat$cat1 <- replace(dat$cat1, dat$cat1 == "MOSF w/Malignancy", 0)
+dat$cat1 <- replace(dat$cat1, dat$cat1 == "ARF", 0)
+dat$cat1 <- replace(dat$cat1, dat$cat1 == "Coma", 0)
+dat$cat1 <- replace(dat$cat1, dat$cat1 == "Cirrhosis", 0)
+dat$cat1 <- replace(dat$cat1, dat$cat1 == "Colon Cancer", 0)
+dat$cat1 <- replace(dat$cat1, dat$cat1 == "Lung Cancer", 0)
+
+dat$cat2 <- replace(dat$cat2, dat$cat2 == c("CHF"), 1)
+dat$cat2 <- replace(dat$cat2, dat$cat2 == c("MOSF w/Sepsis"), 1)
+dat$cat2 <- replace(dat$cat2, dat$cat2 == "COPD", 0)
+dat$cat2 <- replace(dat$cat2, dat$cat2 == "MOSF w/Malignancy", 0)
+dat$cat2 <- replace(dat$cat2, dat$cat2 == "ARF", 0)
+dat$cat2 <- replace(dat$cat2, dat$cat2 == "Coma", 0)
+dat$cat2 <- replace(dat$cat2, dat$cat2 == "Cirrhosis", 0)
+dat$cat2 <- replace(dat$cat2, dat$cat2 == "Colon Cancer", 0)
+dat$cat2 <- replace(dat$cat2, dat$cat2 == "Lung Cancer", 0)
+dat$pafi1 <- replace(dat$pafi1, dat$pafi1 <= 266.15625, 1)
+dat$pafi1 <- replace(dat$pafi1, dat$pafi1 <= 266.15625, 0)
+dat$ninsclas <- replace(dat$ninsclas, dat$ninsclas == "Private", 1)
+dat$ninsclas <- replace(dat$ninsclas, dat$ninsclas == "Medicaid", 0)
+dat$ninsclas <- replace(dat$ninsclas, dat$ninsclas == "Private & Medicare", 1)
+dat$ninsclas <- replace(dat$ninsclas, dat$ninsclas == "Medicare & Medicaid", 0)
+
+dat$swang1 <- as.factor(dat$swang1)
+dat$death <- as.factor(dat$death)
+dat$cardiohx <- as.factor(dat$cardiohx)
+dat$chfhx <- as.factor(dat$chfhx)
+dat$dementhx <- as.factor(dat$dementhx)
+dat$psychhx <- as.factor(dat$psychhx)
+dat$chrpulhx <- as.factor(dat$chrpulhx)
+dat$renalhx <- as.factor(dat$renalhx)
+dat$liverhx <- as.factor(dat$liverhx)
+dat$gibledhx <- as.factor(dat$gibledhx)
+dat$malighx <- as.factor(dat$malighx)
+dat$transhx <- as.factor(dat$transhx)
+dat$amihx <- as.factor(dat$amihx)
+dat$dth30 <- as.factor(dat$dth30)
+dat$cat1 <- as.factor(dat$cat1)
+dat$cat2 <- as.factor(dat$cat2)
+dat$ca <- as.factor(dat$ca)
+dat$sex <- as.factor(dat$sex)
+dat$dnr1 <- as.factor(dat$dnr1)
+dat$ninsclas <- as.factor(dat$ninsclas)
+dat$resp <- as.factor(dat$resp)
+dat$card <- as.factor(dat$card)
+dat$neuro <- as.factor(dat$neuro)
+dat$gastr <- as.factor(dat$gastr)
+dat$renal <- as.factor(dat$renal)
+dat$meta <- as.factor(dat$meta)
+dat$hema <- as.factor(dat$hema)
+dat$seps <- as.factor(dat$seps)
+dat$trauma <- as.factor(dat$trauma)
+dat$ortho <- as.factor(dat$ortho)
+dat$race <- as.factor(dat$race)
+dat$income <- as.factor(dat$income)
+dat$immunhx <- as.factor(dat$immunhx)
+```
+
+```{r}
+#convert NA to mean in integer strings
+dat$dschdte[which(is.na(dat$dschdte))] = mean(dat$dschdte, na.rm = T)
+dat$dthdte[which(is.na(dat$dthdte))] = mean(dat$dthdte, na.rm = T)
+dat$hrt1[which(is.na(dat$hrt1))] = mean(dat$hrt1, na.rm = T)
+dat$resp1[which(is.na(dat$resp1))] = mean(dat$resp1, na.rm = T)
+dat$wtkilo1[which(is.na(dat$wtkilo1))] = mean(dat$wtkilo1, na.rm = T)
+dat$urin1[which(is.na(dat$urin1))] = mean(dat$urin1, na.rm = T)
+dat$adld3p[which(is.na(dat$adld3p))] = mean(dat$adld3p, na.rm = T)
+
+#delete the NA rows of binary cat2 variable
+dat = dat[!is.na(dat$cat2), ]
+```
+
+```{r}
+dat.lm <- glm(swang1 ~ . , data= dat, family=binomial)
+summary(dat.lm)
+par(mfrow= c(2,2))
+plot(dat.lm)
+```
+
+In order to reproduce the general logistic regression model, first, I have implemented "which" and "is.na" function to the columns with integer variables in order to get the mean of each columns and replace them with NA values. 
+
+Although I got the mean and replaced NA with the mean, I have omitted the missing values from cat1. I used this method because the data sets were too huge to use the Mice package in my computer. Also, getting a mean value of binary value and replace it with missing values is not an efficient way to deal with them especially with the columns with two categories. Therefore, I decided to remove them. 
+
+However, in the future, I do not think that this is a good idea to deal with the missing values because lot of datasets were gone by using this method. 
+
+According to the summary of my logistic model, I would build a logistic regression model of  
+$$
+y_i = Intercept + cat1* b_1 + cat2 * b_2 + trauma *b_3 
+$$
+$$
+y_i = 22.59 + b_1*1.071 +b_2*1.141 + b_3*1.814
+$$
+because cat1, cat2 and trauma have the highest coefficient. Also, their p-values are very small that we reject the null hypothesis concluding that they are in fact, one of the most important factors measuring RHC data. 
+
+## Question 2
+### Reproducing GUIDE Importance scores plot
+```{r}
+par(las=1,mar=c(5,12,4,2),cex=1)
+leg.col <- c("orange","yellow")
+leg.txt <- c("highly important","likely important")
+x <- read.table("/Users/irenecho/Desktop/stat443/datafiles/imp.scr",header=TRUE)
+score <- x$Score
+vars <- x$Variable
+type <- x$Type
+barcol <- rep("orange",length(vars))
+barcol[type == "L"] <- "yellow"
+barcol[type == "U"] <- "cyan"
+n <- sum(x$Type != "U")
+barplot(rev(score[1:n]),names.arg=rev(vars[1:n]),col=rev(barcol[1:n]),horiz=TRUE, xlab="GUIDE importance scores")
+abline(v=1,col="red",lty=2)
+legend("bottomright",legend=leg.txt,fill=leg.col)
+```
+
+The guide importance score shows that cat1 is the most important variable followed by crea1, meanbp1 and neuro. It also provides the less likely important features such as education and immunehx. 
+
+## Question 3
+### Effects of Logistic model
+The logistic model I have created highlights the importance of cat1, cat2 and trauma while GUIDE tree and importance score signifies cat1, aps1, and crea1. From my equation, aps1 and crea1 are also considered as highly important; however, not as much as the GUIDE importance score. 
+
+My regression model considers education, immune history, sod1 as less likely important factors which GUIDE tree and importance score also agree. GUIDE and my logistic model concludes that cat1, cat2, trauma, aps1 and crea1 are more important than education, immune history and sod1. 
+
+However, what my logistic model and GUIDE's importance score do not agree is the order of importance. I had cat2 as the most important variable while GUIDE's importance score highlights the fact that cat1 is the most significant variable. 
+
+By looking through the data, I believe that there are some interactions that are different from the GUIDE importance scoring and tree when I work manually by hand. Also, I found it difficult to hand code the replace() function for each categorical variables and assigning the binary values.
+
+## Question 4
+### Building a GUIDE Forest Model
+```{r}
+#creating guide description file in R
+dat <- read.table("/Users/irenecho/Desktop/stat443/datafiles/rhcdata.txt",header=TRUE)
+nvar <- ncol(dat)
+varnames <- names(dat)
+varnames
+roles <- rep("s",nvar)
+c.vars <- c("cat1", "cat2", "ca", "sadmdte", "dschdte", "dthdte", "lstctdte", "death", "cardiohx", "chfhx", "dementhx", "psychhx", "chrpulhx", "renalhx", "liverhx", "gibledhx", "malighx", "immunhx", "transhx", "amihx",  "age", "sex",  "edu", "surv2md1", "das2d3pc", "t3d30" ,"dth30", "aps1", "scoma1", "meanbp1", "wblc1", "hrt1",  "resp1", "temp1", "pafi1", "alb1", "hema1", "bili1", "crea1", "sod1",  "pot1",  "paco21","ph1", "wtkilo1", "dnr1", "ninsclas", "resp", "card", "neuro", "gastr",  "renal","meta", "hema", "seps", "trauma", "ortho","adld3p",  "urin1",   "race",  "income")
+roles[varnames %in% c.vars] <- "c"
+x.vars <- c("X", "survtime", "ptid")
+roles[varnames %in% x.vars] <- "x"
+d.var <- "swang1"
+roles[varnames %in% d.var] <- "d"
+write("rhcdata.txt",file="desc.txt")
+write("NA",file="desc.txt",append=TRUE)
+write("2",file="desc.txt",append=TRUE)
+write.table(cbind(1:nvar,varnames,roles),file="desc.txt",
+            row.names=FALSE,col.names=FALSE,quote=FALSE,append=TRUE)
+```
+
+```{r}
+#R code for plotting predicted probabilities
+tree <- read.table("/Users/irenecho/Desktop/stat443/datafiles/classpred.txt",header=TRUE)
+forest <- read.table("/Users/irenecho/Desktop/stat443/datafiles/forestpred.txt", header=T)
+tree.p <- tree[,6]
+forest.p <- forest[,3]
+plot(forest.p ~ tree.p, xlab="Tree predicted probabilities",ylab="Forest predicted probabilities",col="blue")
+abline(c(0,1),col="red")
+```
+
+I believe that the GUIDE tree model to estimate predicted probabilities are more accurate. Since I have manually created the GUIDE description file and classified c, x and s variables, I think that GUIDE logistic regression tree is a better predictor of RHC data. 
+
+## Question 5
+### Input and Output files
+(refer to the next page)
+
+
+
