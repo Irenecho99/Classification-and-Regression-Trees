@@ -1,0 +1,123 @@
+### Kyungjin Cho
+### Homework 6
+
+
+### Amelia
+
+#### <imputation - sex>
+```{r}
+library(Amelia)
+z <- read.table(file="/Users/irenecho/Desktop/stat443/hw6/fish.dat",header=TRUE,stringsAsFactors=TRUE)
+y <- z$species  ## save a copy of y (species) variable
+z$sex[z$sex == "unknown"] <- NA  ## make "unknown" level NA
+z <- droplevels(z)  ## drop unused "unknown" factor level
+x <- z[,-1]  ## dataframe of predictor variables
+out <- amelia(x,noms=7)  ## 7th column of x is nominal
+c1 <- out$imputations$imp1  ## 1st imputed x matrix
+c2 <- out$imputations$imp2  ## 2nd imputed x matrix
+c3 <- out$imputations$imp3  ## 3rd imputed x matrix
+c4 <- out$imputations$imp4  ## 4th imputed x matrix
+c5 <- out$imputations$imp5  ## 5th imputed x matrix
+table(z$sex,y)
+table(c1$sex,y)
+table(c2$sex,y)
+table(c3$sex,y)
+table(c4$sex,y)
+table(c5$sex,y)
+```
+
+#### <imputation - weight>
+```{r}
+z$weight[z$weight == "unknown"] <- NA  ## make "unknown" level NA
+z <- droplevels(z)  ## drop unused "unknown" factor level
+x <- z[,-1]  ## dataframe of predictor variables
+out <- amelia(x,noms=7)  ## 7th column of x is nominal
+c1 <- out$imputations$imp1  ## 1st imputed x matrix
+c2 <- out$imputations$imp2
+c3 <- out$imputations$imp3
+c4 <- out$imputations$imp4
+c5 <- out$imputations$imp5
+table(z$weight,y)
+table(c1$weight,y)
+table(c2$weight,y)
+table(c3$weight,y)
+table(c4$weight,y)
+table(c5$weight,y)
+```
+
+```{r}
+library(MASS)
+z <- read.table("/Users/irenecho/Desktop/stat443/hw6/fish.dat",header=TRUE,stringsAsFactors=TRUE)
+z <- na.omit(z,na.action="omit") ## omit cases with NA
+lda.model <- lda(sex ~ .,data=z)
+predicted <- predict(lda.model,newdata=z)$class
+print(table(predicted,z$sex))
+```
+
+### Multinomial Logistic Regression
+
+#### <imputation - sex>
+```{r}
+library(nnet)
+z <- na.omit(z)  ## remove observations with NAs
+mul <- multinom(species ~ ., data=z)
+predicted <- predict(mul,newdata=z,type="class")
+table(z$sex,predicted)
+```
+
+#### <imputation - weight>
+```{r}
+table(z$weight,predicted)
+```
+
+### MICE
+
+#### <imputation - sex>
+```{r}
+library(mice)
+z <- read.table(file="/Users/irenecho/Desktop/stat443/hw6/fish.dat",header=TRUE,stringsAsFactors=TRUE)
+names(z)
+y <- z$species  ## save a copy of species variable
+z$sex[z$sex == "unknown"] <- NA  ## make "unknown" level NA
+z <- droplevels(z)  ## drop unused "unknown" factor level
+out <- mice(z[,-1])   ## exclude y variable
+c1 <- complete(out,1) ## 1st imputed data set
+c2 <- complete(out,2)
+c3 <- complete(out,3)
+c4 <- complete(out,4)
+c5 <- complete(out,5)
+
+#to get unknown, reload the data again
+z <- read.table(file="/Users/irenecho/Desktop/stat443/hw6/fish.dat",header=TRUE,stringsAsFactors=TRUE)
+
+table(z$sex,y)  ## data before imputation
+table(c1$sex,y)
+table(c2$sex,y)
+table(c3$sex,y)
+table(c4$sex,y)
+table(c5$sex,y)
+```
+
+#### <imputation - weight>
+```{r}
+z$weight[z$weight == "unknown"] <- NA  ## make "unknown" level NA
+z <- droplevels(z)  ## drop unused "unknown" factor level
+out <- mice(z[,-1])   ## exclude y variable
+c1 <- complete(out,1) ## 1st imputed data set
+c2 <- complete(out,2)
+c3 <- complete(out,3)
+c4 <- complete(out,4)
+c5 <- complete(out,5)
+
+#to get unknown, reload the data again
+z <- read.table(file="/Users/irenecho/Desktop/stat443/hw6/fish.dat",header=TRUE,stringsAsFactors=TRUE)
+
+table(z$weight,y)  ## data before imputation
+table(c1$weight,y)
+table(c2$weight,y)
+table(c3$weight,y)
+table(c4$weight,y)
+table(c5$weight,y)
+```
+
+
